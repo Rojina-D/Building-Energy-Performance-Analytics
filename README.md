@@ -12,6 +12,12 @@ python3 -m venv .venv
 
 Open `http://localhost:5000`. The first run creates `energy_analytics.db` with a deterministic 21-day demonstration data set. It includes a cumulative meter reset, duplicate DST hour, and a one-day sensor-swap gap so the ETL behavior can be inspected.
 
+Run the regression suite with:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
 ## Analytics design
 
 1. Clean source records: deduplicate DST intervals, correct cumulative-meter resets, and omit missing-zone hours rather than treating them as zero.

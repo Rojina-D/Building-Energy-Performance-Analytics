@@ -50,7 +50,7 @@ class AnalyticsPipeline:
             working = weekday < 5 and 7 <= hour < 18
             for index, (zone, meta) in enumerate(ZONES.items()):
                 # Sensor swap gap: unavailable telemetry should not become zero energy.
-                if zone == "Studio" and 10 * 96 < tick < 11 * 96:
+                if zone == "Studio" and 10 * 96 <= tick < 11 * 96:
                     continue
                 occupied = working and (zone != "Meeting Room" or 9 <= hour < 16) and random.random() > .12
                 co2 = 460 + (440 if occupied else 25) + random.uniform(-25, 25)
@@ -67,9 +67,10 @@ class AnalyticsPipeline:
                 meter[zone] += max(.01, energy)
                 # A cumulative meter reset is a normal field-data condition.
                 shown_meter = meter[zone] if not (zone == "South Office" and tick >= 14 * 96) else meter[zone] - meter[zone] * .72
+                setpoint = 21.0 if working or (zone == "North Office" and not working) else 17.0
                 rows.append((zone, stamp.isoformat(), round(21 + heat * .8 - cool * .7 + random.uniform(-.3, .3), 1),
                              round(38 + random.uniform(-4, 4), 1), round(co2, 0), int(occupied), heat, cool,
-                             21.0 if working else 17.0, round(shown_meter, 3), round(outdoor, 1)))
+                             setpoint, round(shown_meter, 3), round(outdoor, 1)))
         # Duplicate local hour simulates a DST fall-back export.
         rows.extend([r for r in rows if r[1].startswith("2026-01-11T01:")])
         return rows
